@@ -11,6 +11,11 @@ const io = new Server(server);
 io.on("connection", (socket) => {
   console.log("A player connected:", socket.id);
 
+  socket.on("test_message", (msg) => {
+    console.log(`Message from client ${socket.id}: ${msg}`);
+    socket.emit("message", "Hello from the server!");
+  });
+
   socket.on("disconnect", () => {
     console.log("A player disconnected:", socket.id);
   });
