@@ -1,6 +1,6 @@
 const io = require("socket.io-client");
 const readline = require("readline");
-
+const logger = require("./logger");
 // Conecta ao servidor
 const socket = io("http://localhost:3000");
 
@@ -12,15 +12,15 @@ const rl = readline.createInterface({
 
 // Exibe instruções no terminal
 function showInstructions() {
-  console.log("\nComandos disponíveis:");
-  console.log("startTurn                - Iniciar um novo turno");
-  console.log("selectCard [index]       - Selecionar uma carta pelo índice");
-  console.log("exit                     - Sair do jogo\n");
+  logger.info("\nComandos disponíveis:");
+  logger.info("startTurn                - Iniciar um novo turno");
+  logger.info("selectCard [index]       - Selecionar uma carta pelo índice");
+  logger.info("exit                     - Sair do jogo\n");
 }
 
 // Conecta e lida com eventos
 socket.on("connect", () => {
-  console.log("Conectado ao servidor como cliente:", socket.id);
+  logger.info("Conectado ao servidor como cliente:", socket.id);
   showInstructions();
   promptUser();
 });
@@ -31,31 +31,31 @@ function processCommand(command) {
 
   switch (action) {
     case "startTurn":
-      console.log("Iniciando um novo turno...");
+      logger.info("Iniciando um novo turno...");
       socket.emit("startTurn");
       break;
 
     case "selectCard":
       const cardIndex = parseInt(param);
       if (isNaN(cardIndex)) {
-        console.log(
+        logger.info(
           "Erro: você deve fornecer um índice válido para selectCard."
         );
       } else {
-        console.log(`Selecionando a carta com índice ${cardIndex}...`);
+        logger.info(`Selecionando a carta com índice ${cardIndex}...`);
         socket.emit("selectCard", { index: cardIndex });
       }
       break;
 
     case "exit":
-      console.log("Saindo do jogo...");
+      logger.info("Saindo do jogo...");
       rl.close();
       socket.disconnect();
       process.exit(0);
       break;
 
     default:
-      console.log("Comando não reconhecido. Tente novamente.");
+      logger.info("Comando não reconhecido. Tente novamente.");
       showInstructions();
   }
 }
@@ -70,12 +70,12 @@ function promptUser() {
 
 // Recebe atualizações do estado do jogo
 socket.on("update", (data) => {
-  console.log("Atualização do estado do jogo:", data.state);
+  logger.info("Atualização do estado do jogo:", data.state);
 });
 
 // Recebe mensagem de fim de jogo
 socket.on("gameOver", (data) => {
-  console.log("Fim de jogo:", data.message);
+  logger.info("Fim de jogo:", data.message);
   rl.close();
   socket.disconnect();
   process.exit(0);
@@ -83,7 +83,7 @@ socket.on("gameOver", (data) => {
 
 // Lida com o evento de desconexão
 socket.on("disconnect", () => {
-  console.log("Desconectado do servidor");
+  logger.info("Desconectado do servidor");
   rl.close();
   process.exit(0);
 });

@@ -3,6 +3,7 @@ const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const Game = require("./game/game"); // Load the Game class
+const logger = require("./logger");
 
 const app = express();
 const httpServer = createServer(app);
@@ -12,7 +13,7 @@ const io = new Server(httpServer, { cors: { origin: "*" } });
 const activeGames = {};
 
 io.on("connection", (socket) => {
-  console.log("New player connected:", socket.id);
+  logger.info("New player connected:", socket.id);
 
   // Cria uma nova instância do jogo para este jogador
   const gameInstance = new Game();
@@ -48,12 +49,12 @@ io.on("connection", (socket) => {
 
   // Ao desconectar, limpa a instância de jogo
   socket.on("disconnect", () => {
-    console.log("Player disconnected:", socket.id);
+    logger.info("Player disconnected:", socket.id);
     delete activeGames[socket.id];
   });
 });
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  logger.info(`Server running on http://localhost:${PORT}`);
 });
